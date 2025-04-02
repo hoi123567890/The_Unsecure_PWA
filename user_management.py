@@ -18,7 +18,7 @@ def insertUser(username, pa, DoB):
 def retrieveUsers(username, password):
     con = sql.connect("database_files/database.db")
     cur = con.cursor()
-    c=cur.execute("SELECT password FROM users WHERE username = ?", (username,))
+    cur.execute("SELECT password FROM users WHERE username = ?", (username,))
     result = cur.fetchone()
     if result is None:
         con.close()
@@ -42,10 +42,8 @@ def retrieveUsers(username, password):
                 print("Warning: Invalid content in visitor_log.txt. Resetting to 1.")
                 with open("visitor_log.txt", "w") as file:
                     file.write("1")
-
             # Simulate response time of heavy app for testing purposes
             time.sleep(random.randint(80, 90) / 1000)
-
             con.close()
             return True  # Authentication successful
         else:
