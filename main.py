@@ -1,14 +1,11 @@
-from flask import Flask
-from flask import render_template
-from flask import request
-from flask import redirect
+from flask import Flask,render_template,request,redirect
 import user_management as dbHandler
-
 # Code snippet for logging a message
 # app.logger.critical("message")
 
-app = Flask(__name__)
 
+app = Flask(__name__)
+app.secret_key = "change_this_please" #change this and softcode it
 
 @app.route("/success.html", methods=["POST", "GET", "PUT", "PATCH", "DELETE"])
 def addFeedback():
@@ -55,11 +52,12 @@ def home():
             return render_template("/success.html", value=username, state=isLoggedIn)
         else:
             return render_template("/index.html")
+        print ("1")
     else:
         return render_template("/index.html")
 
 
+
 if __name__ == "__main__":
-    app.config["TEMPLATES_AUTO_RELOAD"] = True
-    app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.config["TEMPLATES_AUTO_RELOAD"] = False
+    app.run(debug=False, host="0.0.0.0", port=5000)

@@ -1,11 +1,12 @@
 import sqlite3 as sql
 import time
 import random
+from werkzeug.security import generate_password_hash, check_password_hash
 
-
-def insertUser(username, password, DoB):
+def insertUser(username, pa, DoB):
     con = sql.connect("database_files/database.db")
     cur = con.cursor()
+    password=generate_password_hash(pa)
     cur.execute(
         "INSERT INTO users (username,password,dateOfBirth) VALUES (?,?,?)",
         (username, password, DoB),
@@ -17,26 +18,39 @@ def insertUser(username, password, DoB):
 def retrieveUsers(username, password):
     con = sql.connect("database_files/database.db")
     cur = con.cursor()
-    cur.execute(f"SELECT * FROM users WHERE username = '{username}'")
-    if cur.fetchone() == None:
+    c=cur.execute("SELECT password FROM users WHERE username = ?", (username,))
+    result = cur.fetchone()
+    if result is None:
         con.close()
-        return False
+        return False  # User not found
     else:
-        cur.execute(f"SELECT * FROM users WHERE password = '{password}'")
-        # Plain text log of visitor count as requested by Unsecure PWA management
-        with open("visitor_log.txt", "r") as file:
-            number = int(file.read().strip())
-            number += 1
-        with open("visitor_log.txt", "w") as file:
-            file.write(str(number))
-        # Simulate response time of heavy app for testing purposes
-        time.sleep(random.randint(80, 90) / 1000)
-        if cur.fetchone() == None:
+        hashed_password = result[0]
+        if check_password_hash(hashed_password, password):
+            # Plain text log of visitor count as requested by Unsecure PWA management
+            try:
+                with open("visitor_log.txt", "r+") as file:
+                    content = file.read().strip()
+                    number = int(content) if content else 0
+                    number += 1
+                    file.seek(0)
+                    file.write(str(number))
+                    file.truncate()
+            except FileNotFoundError:
+                with open("visitor_log.txt", "w") as file:
+                    file.write("1")
+            except ValueError:
+                print("Warning: Invalid content in visitor_log.txt. Resetting to 1.")
+                with open("visitor_log.txt", "w") as file:
+                    file.write("1")
+
+            # Simulate response time of heavy app for testing purposes
+            time.sleep(random.randint(80, 90) / 1000)
+
             con.close()
-            return False
+            return True  # Authentication successful
         else:
             con.close()
-            return True
+            return False # Incorrect password
 
 
 def insertFeedback(feedback):
