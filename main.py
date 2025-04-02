@@ -70,5 +70,4 @@ def handle_rate_limit_exceeded(e):
     return jsonify({'message': 'Too many requests. Please try again later.'}), 429   
 
 if __name__ == "__main__":
-    app.config["TEMPLATES_AUTO_RELOAD"] = True
     app.run(debug=False, host="0.0.0.0", port=5000)
